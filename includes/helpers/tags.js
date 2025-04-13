@@ -25,8 +25,8 @@ module.exports = function (hexo) {
                 return false;
             }
             for (const { text, url } of items) {
-                if (!text || !url) {
-                    setTimeout(() => { hexo.log.error(`Invalid navbar item in language "${lang}". Each item must have "text" and "url". Please check your navbar config in theme/doku/_config.yml`); }, 100);
+                if (!url) {
+                    setTimeout(() => { hexo.log.error(`Invalid navbar item in language "${lang}". Each item must have a valid "url". Please check your navbar config in theme/doku/_config.yml`); }, 100);
                     return false;
                 }
             }
