@@ -15,7 +15,6 @@ module.exports = function (hexo) {
 
     // check the config of navbar
     const check_navbar_config = (navbar) => {
-        console.log('navbar', JSON.stringify(navbar, null, 2)); 
         if (!navbar?.links || !Object.keys(navbar.links).length) {
             setTimeout(() => { hexo.log.error('Invalid navbar configuration. Please check your navbar config in theme/doku/_config.yml'); }, 100);
             return false;
@@ -39,7 +38,7 @@ module.exports = function (hexo) {
         return true;
     }
     hexo.extend.helper.register('check_navbar_config', check_navbar_config);
-    
+
     // check the config of sidebar
     function check_sidebar_config(sidebar) {
         if (!sidebar || ![1, 2].includes(sidebar.level) || !Array.isArray(sidebar.items)) {
