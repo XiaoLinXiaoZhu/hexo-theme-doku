@@ -13,6 +13,43 @@ module.exports = function (hexo) {
 
     hexo.extend.helper.register('_meta_generator', () => `<meta name="generator" content="Hexo ${hexo.version}">`);
 
+    // check the config of navbar
+    const check_navbar_config = (navbar) => {
+        console.log('navbar', JSON.stringify(navbar, null, 2)); 
+        if (!navbar?.links || !Object.keys(navbar.links).length) {
+            setTimeout(() => { hexo.log.error('Invalid navbar configuration. Please check your navbar config in theme/doku/_config.yml'); }, 100);
+            return false;
+        }
+        for (const [lang, items] of Object.entries(navbar.links)) {
+            if (!Array.isArray(items) || !items.length) {
+                setTimeout(() => { hexo.log.error(`Navbar links for language "${lang}" are empty or invalid. Please check your navbar config in theme/doku/_config.yml`); }, 100);
+                return false;
+            }
+            for (const { text, url } of items) {
+                if (!text || !url) {
+                    setTimeout(() => { hexo.log.error(`Invalid navbar item in language "${lang}". Each item must have "text" and "url". Please check your navbar config in theme/doku/_config.yml`); }, 100);
+                    return false;
+                }
+            }
+        }
+        if (!navbar.links.hasOwnProperty(hexo.config.language)) {
+            setTimeout(() => { hexo.log.error(`Navbar links for language "${hexo.config.language}" are not defined. Please check your navbar config in theme/doku/_config.yml`); }, 100);
+            return false;
+        }
+        return true;
+    }
+    hexo.extend.helper.register('check_navbar_config', check_navbar_config);
+    
+    // check the config of sidebar
+    function check_sidebar_config(sidebar) {
+        if (!sidebar || ![1, 2].includes(sidebar.level) || !Array.isArray(sidebar.items)) {
+            setTimeout(() => { hexo.log.error('Invalid sidebar configuration. Please check your sidebar config in theme/doku/_config.yml'); }, 100);
+            return false;
+        }
+        return true;
+    }
+    hexo.extend.helper.register('check_sidebar_config', check_sidebar_config);
+    
     hexo.extend.helper.register('page_nav', function (page = null) {
         page = (page === null) ? this.page : page;
         const { path } = this;
@@ -22,6 +59,11 @@ module.exports = function (hexo) {
         const sidebar = hexo.theme.config.sidebar[page.lang][page.type];
         const sidebarLinkArr = [];
         const sidebarNameArr = [];
+
+        // check before iterate
+        if (!check_sidebar_config(sidebar)) {
+            return html;
+        }
         if (sidebar.level === 1) {
             for (const item of sidebar.items) {
                 sidebarNameArr.push(item.split(' | ')[0]);
